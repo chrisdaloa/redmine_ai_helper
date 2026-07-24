@@ -1,0 +1,1 @@
+{"nodes": [{"id": "claude_skills_qlty_check_skill_doc", "label": "qlty-check skill", "file_type": "document", "source_file": ".claude/skills/qlty-check/SKILL.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}

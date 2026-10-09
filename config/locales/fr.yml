@@ -17,6 +17,8 @@ fr:
   permission_view_ai_helper: "Voir l'Assistant IA"
   label_ai_helper_error: "Erreur"
   ai_helper:
+    vector_search:
+      embedding_dimension: "Dimension"
     notice_sub_issues_added: "Les sous-tâches ont été ajoutées"
     error_empty_issue_summary: "Le modèle d'IA a renvoyé un résumé vide. Cela peut se produire si le modèle manque de jetons pendant le raisonnement ; envisagez d'augmenter max_tokens dans le profil du modèle."
     project_health:
@@ -103,9 +105,12 @@ fr:
         vector_search_uri: "URI"
         vector_search_api_key: "Clé API"
         embedding_model: "Modèle d'intégration"
-        dimension: "Dimension"
         read_only_mode: "Read-only mode"
         read_only_mode_description: "When enabled, the AI Helper chat cannot create, update, or delete any data (issues, wiki pages, comments, etc.). External MCP server integration is also disabled."
+        all_projects_scope: "Target all projects"
+        all_projects_scope_description: "When enabled, projects without the AI Helper module also become targets for reading and updating data from the chat, chat gateways, and the MCP server, and are eligible for vector registration. AI Helper UI elements are still shown only in projects with the module enabled, and Redmine permissions of the requesting user always apply."
+        log_access_enabled: "Allow log file access"
+        log_access_enabled_description: "When enabled, administrators can read the Redmine application log and the AI Helper log from the chat and the MCP server. The log contents are sent to the configured LLM provider, or to the MCP client when read through the MCP server. Log files may contain personal or sensitive information, so enable this only when needed."
       ai_helper_project_setting:
         issue_draft_instructions: "Instructions pour la génération de commentaires de demande"
         subtask_instructions: "Instructions pour la génération de sous-tâches"

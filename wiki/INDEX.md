@@ -9,6 +9,8 @@ page files, not here.
 - [Multi-Agent Architecture](./pages/multi-agent-architecture.md) — request flow, LeaderAgent planning, agent auto-registration, tool system, provider layer, and streaming.
 
 ## decision
+- [All-Projects Data-Access Scope](./pages/all-projects-data-access-scope.md) — the `all_projects_scope` admin setting and the `PermissionChecker.data_accessible?`/`data_access_condition` methods that enforce the data-access decision across every data-reaching tool (originally 8 duplicated module-gated checks), with the intentional module-enabled/disabled asymmetry.
+- [All-Projects Scope: Effects & Alternatives](./pages/all-projects-scope-effects.md) — the vector-registration scope change, what stays module-gated (UI, gateway entry, read-only mode), and rejected alternatives.
 - [Agent Write-Capability Routing](./pages/agent-write-capability-routing.md) — why `can_write?`/`requires_write` guard write steps at dispatch time instead of being exposed to the router, and how skipped steps and the final-answer prompt stay consistent with what actually ran.
 - [MCP subscriptions/listen Rejection](./pages/mcp-listen-rejection.md) — ADR-031: the root cause (a streaming Proc body stringified into a fake 200), the three-part fix, alternatives rejected, and the gem-version-coupling gotcha it leaves behind.
 - [MCP subscriptions/listen 1.4.0 Fix](./pages/mcp-listen-rejection-1-4-0-fix.md) — ADR-032: how `mcp` 1.4.0 turned `serves_subscriptions_listen?` into the rejection gate itself, silently reopening the id-less request-storm case, and why deleting the override (not adopting the gem's new `serve_subscriptions_listen: false`) fixes it.
@@ -19,6 +21,13 @@ page files, not here.
 - [Testing Classic Scripts via Dynamic Import](./pages/classic-script-testing-strategy.md) — why tests load target files as side-effect-only dynamic imports, the 4 files needing a new `window.X` line, and the `ai_helper.js` `var`→`window.ai_helper` fix.
 - [JavaScript Coverage Ratchet Policy](./pages/js-coverage-ratchet-policy.md) — why the 90% lines threshold is a literal in `vitest.config.js`, raised only, and why it's separate from Ruby's 95%.
 - [search_issues Cross-Project Scoping](./pages/search-issues-cross-project-scoping.md) — why omitting `project_id` scopes to `Project.allowed_to_condition(user, :view_ai_helper)` instead of plain `Issue.visible`, and why the single-project path stays untouched.
+- [Issue Summary Instructions & Role Gating](./pages/issue-summary-instructions-role-gating.md) — the one-query `Member`-based role resolution for users and groups, and why role enrichment is gated on the project's `issue_summary_instructions` being present.
+- [Issue Summary Instructions: Prompt Template & Settings](./pages/issue-summary-instructions-prompt-template.md) — the zero-prompt-diff template split, the setting's name vs. the wiki-summary feature, and why no cache invalidation is needed.
+- [Log File Location Resolution](./pages/log-file-location-resolution.md) — ADR-039: finding the Redmine log from the runtime `Rails.logger` (BroadcastLogger → private `@logdev` → `LogDevice#filename`), sharing `CustomLogger.log_file_path` for the AI Helper log, and never reading a substitute file.
+- [Model Profile Temperature Is Optional](./pages/model-profile-optional-temperature.md) — ADR-042: blank temperature sends none (providers already skip nil), the validation/migration/connection-test changes, GPT-5 auto-correction kept, and alternatives rejected.
+- [Health Report Editing](./pages/health-report-editing.md) — feature 064: the `:edit_ai_helper_health_reports` permission, keeping original + latest only, optimistic locking, `\r` normalization for unchanged saves, anonymous-editor reassignment, overview-cache invalidation, and edited notices in exports.
+- [Health Report Markdown Rendering](./pages/health-report-markdown-rendering.md) — ADR-044: saved reports render via `md_to_html` regardless of text formatting, the self-loaded CommonMark jsToolBar, the dedicated preview endpoint, and the server-rendered detail pane.
+- [Version Write Tools: Strict Input & Error Results](./pages/version-write-tools-error-policy.md) — ADR-047/048: why disallowed sharing/custom fields error instead of being dropped, and why user mistakes return `{ error: }` while system failures raise.
 
 ## component
 - [Chat Channel Gateway Architecture](./pages/chat-channel-gateway-architecture.md) — core + adapters structure, capability declaration, and gateway operational model.
@@ -31,14 +40,18 @@ page files, not here.
 - [MCP Integration](./pages/mcp-integration.md) — consuming external MCP servers: dynamic agent generation and the read-only gotcha. See [MCP Server Endpoint](./pages/mcp-server-endpoint.md) for the other direction.
 - [MCP Server Endpoint](./pages/mcp-server-endpoint.md) — exposing Redmine as an MCP server: stateless mode, auth, permissions, tool groups, and the anonymous-endpoint pattern reused by inbound webhooks.
 - [Custom Commands](./pages/custom-commands.md) — reusable `/command` prompt shortcuts, scope precedence, template variables.
-- [Project Health Report](./pages/health-report.md) — `ProjectAgent` dual-pattern generation, `AiHelperHealthReport` storage, streamed comparison, export, and REST API.
+- [Project Health Report](./pages/health-report.md) — `ProjectAgent` dual-pattern generation, `AiHelperHealthReport` storage, streamed comparison, export, REST API, and links to editing/rendering decisions.
 - [Think Model](./pages/think-model.md) — optional deep-reasoning model profile, its scope, validation, and no-fallback rules.
 - [BaseAgent LLM Calls](./pages/base-agent-llm-calls.md) — `chat` vs `@assistant` call styles, `think_chat`, and the `with_model` cross-provider gotcha.
 - [Tool System](./pages/tool-system.md) — the `BaseTools` DSL, `write: true`/read-only filtering, per-tool permission checks, and the tool providers.
 - [LLM Provider Layer](./pages/llm-provider-layer.md) — the `LlmProvider` factory, resolution paths, provider subclasses/quirks, profile config, and structured output.
+- [Embedding Connection Test](./pages/embedding-connection-test.md) — the vector-tab button that embeds a fixed text with the unsaved form values: shared profile rule, 10 s per-request timeout gotchas, response check, and the removed `dimension`/`embedding_url` settings.
 - [Vector Search Internals](./pages/vector-search-internals.md) — Qdrant subsystem components, hybrid content/embeddings, payload indexes, rake tasks, staleness sync, and project-selection scope/gating.
 - [JavaScript Quality Tooling](./pages/js-quality-tooling.md) — ESLint 10 flat config + Vitest 4/jsdom + `@vitest/coverage-v8`, Node.js/npm setup, and regression-check/CI wiring.
 - [Wiki Tools](./pages/wiki-tools.md) — `WikiTools`/`WikiWriteTools`: the unified `{id:, title:}` parent format, `wiki_update_page`'s `parent_title` semantics and validation, and why cross-wiki parents and N+1 eager-loading were left alone.
+- [Log File Access Tools](./pages/log-file-access-tools.md) — `SystemTools`' admin-only `get_log_file_info`/`read_log_tail`/`search_log`: admin → setting → input gating, the `log_access_enabled` setting, limits, path hiding, and `SystemAgent` prompt guidance.
+- [Log File Reader](./pages/log-file-reader.md) — `LogFileReader`: backward chunked tail and search, the 500 MB scan cap, literal matching, and when line numbers count from the start vs. only from the end.
+- [Version Write Tools](./pages/version-write-tools.md) — feature 068: `create_version`/`update_version`/`delete_version`, `capable_version_props`, permissions on the version's own project, delete rules, update semantics.
 
 ## reference
 - [Chat History APIs](./pages/chat-history-apis.md) — Slack/Discord message-retrieval APIs, scopes, display-name resolution, exclusion rules.

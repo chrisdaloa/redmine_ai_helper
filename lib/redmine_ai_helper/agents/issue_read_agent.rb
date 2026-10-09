@@ -9,6 +9,8 @@ module RedmineAiHelper
     # IssueReadAgent is a specialized agent for handling Redmine issue-related queries.
     class IssueReadAgent < RedmineAiHelper::BaseAgent
       include RedmineAiHelper::Util::IssueJson
+      # Role enrichment is summary-only; only this agent may include WithRoles.
+      include RedmineAiHelper::Util::IssueJson::WithRoles
       include RedmineAiHelper::Util::AttachmentFileHelper
       include ROUTE_HELPERS
 
@@ -46,12 +48,18 @@ module RedmineAiHelper
       def issue_summary(issue:, stream_proc: nil)
         return "Permission denied" unless issue.visible?
 
+        # Read-only lookup: the summary path must not create a settings row
+        # (concurrent summaries would otherwise race on the INSERT).
+        issue_summary_instructions = AiHelperProjectSetting.find_by(project_id: issue.project_id)&.issue_summary_instructions
         prompt = load_prompt("issue_read_agent/summary")
-        project_setting = AiHelperProjectSetting.settings(issue.project)
-        issue_json = generate_issue_data(issue)
+        issue_json = build_summary_issue_data(issue, issue_summary_instructions)
         # Convert issue data to JSON string for the prompt
         json_string = JSON.pretty_generate(issue_json)
-        prompt_text = prompt.format(issue: json_string, issue_summary_instructions: project_setting.issue_summary_instructions)
+        prompt_text = prompt.format(issue: json_string)
+        if issue_summary_instructions.present?
+          instructions_prompt = load_prompt("issue_read_agent/summary_instructions")
+          prompt_text += "\n\n" + instructions_prompt.format(instructions: sanitize_summary_instructions(issue_summary_instructions))
+        end
         message = { role: "user", content: prompt_text }
         messages = [ message ]
 
@@ -375,6 +383,30 @@ module RedmineAiHelper
 
       private
 
+      # Builds the issue payload used by the summary prompt.
+      # Uses the role-enriched representation only when summary instructions are set,
+      # so that projects without instructions receive the byte-identical legacy prompt.
+      # @param issue [Issue] The issue to be represented in JSON.
+      # @param issue_summary_instructions [String, nil] The project's summary instructions.
+      # @return [Hash] The issue hash for the summary prompt.
+      def build_summary_issue_data(issue, issue_summary_instructions)
+        if issue_summary_instructions.present?
+          generate_issue_data_with_roles(issue)
+        else
+          generate_issue_data(issue)
+        end
+      end
+
+      # Neutralizes the project_instructions delimiter inside the trusted summary
+      # instructions. Without this, an instruction value containing
+      # `</project_instructions>` could close the trust boundary tag early and
+      # place forged text after it, at the most influential position of the prompt.
+      # @param instructions [String] The trusted project-level summary instructions.
+      # @return [String] The instructions safe to embed between the delimiter tags.
+      def sanitize_summary_instructions(instructions)
+        instructions.gsub(%r{</?\s*project_instructions\b[^>]*/?>}i, "")
+      end
+
       # Fetch todo issues based on options
       # @param options [Hash] Options for filtering issues
       # @option options [Project] :project The project to fetch issues from
@@ -398,12 +430,9 @@ module RedmineAiHelper
       # @return [ActiveRecord::Relation] Issues from other projects
       def fetch_todo_issues_from_other_projects
         # Get all visible projects except current project
-        eligible_projects = Project.visible
-          .where.not(id: @project.id)
-          .select do |proj|
-            proj.module_enabled?(:ai_helper) &&
-              User.current.allowed_to?(:view_ai_helper, proj)
-          end
+        eligible_projects = RedmineAiHelper::Util::PermissionChecker.accessible_projects(
+          Project.visible.where.not(id: @project.id)
+        )
 
         return Issue.none if eligible_projects.empty?
 

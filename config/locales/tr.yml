@@ -32,6 +32,8 @@ tr:
   label_ai_helper_report_detail_mobile: "Rapor Detayı"
   label_ai_helper_close_detail: "Detayı Kapat"
   ai_helper:
+    vector_search:
+      embedding_dimension: "Boyut"
     settings:
       tab_general: "Genel"
       tab_model: "Model"
@@ -275,18 +277,21 @@ tr:
         vector_search_uri: "URI"
         vector_search_api_key: "API anahtarı"
         embedding_model: "Embedding modeli"
-        dimension: "Boyut"
         use_think_model: "Düşünme modelini kullan"
         think_model_profile_id: "Düşünme modeli profili"
         think_model_description: "Sağlık raporu oluşturma ve iş yanıtı taslağı hazırlama gibi daha derin akıl yürütme gerektiren görevler için ayrı bir model kullanın."
         use_vector_model_profile: "Vektör model profilini kullan"
         vector_model_profile_id: "Vektör model profili"
-        vector_model_profile_description: "Vektör arama işlemleri (API kimlik bilgileri ve içerik analizi) için ayrı bir model profili kullanın. Not: embedding model adı yine de yukarıdaki Embedding modeli ayarı tarafından kontrol edilir."
+        vector_model_profile_description: "Vektör arama için \"Model profili\" ayarından farklı bir model profili kullanır. \"Model profili\" ile belirtilen LLM sağlayıcısı embedding modeli sunmuyorsa burada başka bir model profili belirtin."
         mcp_server_enabled: "MCP sunucusunu etkinleştir"
         send_user_id_enabled: "Kullanıcı ID'sini LLM'e gönder"
         send_user_id_enabled_description: "Etkinleştirildiğinde, dahili Redmine kullanıcı ID'si LLM sağlayıcısına gönderilir. Bu, alt sistemlerde (ör. LiteLLM) kullanıcı bazlı istatistik takibine olanak tanır. Etkinleştirmeden önce gizlilik etkilerini göz önünde bulundurun."
         read_only_mode: "Salt okunur mod"
         read_only_mode_description: "Etkinleştirildiğinde, AI Asistan sohbeti herhangi bir veri (işler, wiki sayfaları, yorumlar vb.) oluşturamaz, güncelleyemez veya silemez. Harici MCP sunucusu entegrasyonu da devre dışı bırakılır."
+        all_projects_scope: "Target all projects"
+        all_projects_scope_description: "When enabled, projects without the AI Helper module also become targets for reading and updating data from the chat, chat gateways, and the MCP server, and are eligible for vector registration. AI Helper UI elements are still shown only in projects with the module enabled, and Redmine permissions of the requesting user always apply."
+        log_access_enabled: "Allow log file access"
+        log_access_enabled_description: "When enabled, administrators can read the Redmine application log and the AI Helper log from the chat and the MCP server. The log contents are sent to the configured LLM provider, or to the MCP client when read through the MCP server. Log files may contain personal or sensitive information, so enable this only when needed."
       ai_helper_project_setting:
         issue_draft_instructions: "İş yorumu oluşturma talimatları"
         subtask_instructions: "Alt görev oluşturma talimatları"

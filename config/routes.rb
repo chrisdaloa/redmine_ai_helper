@@ -48,12 +48,18 @@ RedmineApp::Application.routes.draw do
   post "projects/:id/ai_helper/health_reports/compare", to: "ai_helper_dashboard#compare_health_reports", as: "ai_helper_health_report_compare_analyze"
   post "projects/:id/ai_helper/health_reports/compare/pdf", to: "ai_helper_dashboard#comparison_pdf", as: "ai_helper_health_report_comparison_pdf"
   post "projects/:id/ai_helper/health_reports/compare/markdown", to: "ai_helper_dashboard#comparison_markdown", as: "ai_helper_health_report_comparison_markdown"
+  # Preview must precede the :report_id routes so "preview" is not captured as a report id
+  post "projects/:id/ai_helper/health_reports/preview", to: "ai_helper_dashboard#health_report_preview", as: "ai_helper_health_report_preview"
+  get "projects/:id/ai_helper/health_reports/:report_id/markdown", to: "ai_helper_dashboard#health_report_markdown", as: "ai_helper_health_report_markdown"
+  patch "projects/:id/ai_helper/health_reports/:report_id", to: "ai_helper_dashboard#health_report_update", as: "ai_helper_health_report_update"
   get "projects/:id/ai_helper/health_reports/:report_id", to: "ai_helper_dashboard#health_report_show", as: "ai_helper_health_report_show"
   delete "projects/:id/ai_helper/health_reports/:report_id", to: "ai_helper_dashboard#health_report_destroy", as: "ai_helper_health_report_destroy"
 
   get "ai_helper_settings/index", to: "ai_helper_settings#index", as: "ai_helper_setting"
   post "ai_helper_settings/index", to: "ai_helper_settings#update", as: "ai_helper_setting_update"
   get "ai_helper_settings/help/:channel_type", to: "ai_helper_settings#help", as: "ai_helper_settings_help"
+  post "ai_helper_settings/test_vector_connection", to: "ai_helper_settings#test_vector_connection", as: "ai_helper_settings_test_vector_connection"
+  post "ai_helper_settings/test_embedding_connection", to: "ai_helper_settings#test_embedding_connection", as: "ai_helper_settings_test_embedding_connection"
 
   post "ai_helper_channel_bindings", to: "ai_helper_channel_bindings#create", as: "ai_helper_channel_bindings"
   delete "ai_helper_channel_bindings/:id", to: "ai_helper_channel_bindings#destroy", as: "ai_helper_channel_binding"

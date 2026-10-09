@@ -36,6 +36,7 @@ module RedmineAiHelper
           "content_id=#{content_id}, question=#{question.inspect}"
         )
         container = resolve_container(content_type, content_id)
+        raise("Project is not accessible: id = #{container.project&.id}") unless accessible_project?(container.project)
         ai_helper_logger.debug("resolved container: #{container.class.name}##{container.id}")
         file_paths = supported_attachment_paths(container)
         ai_helper_logger.debug(
@@ -106,7 +107,8 @@ module RedmineAiHelper
 
       # Call LLM to analyze files.
       # @param prompt [String] The analysis prompt
-      # @param file_paths [Array<String>] Paths or URLs of files
+      # @param file_paths [Array<String, RubyLLM::Attachment>] Paths or URLs of files,
+      #   or in-memory attachments
       # @return [String] The analysis result text
       def analyze_with_llm(prompt:, file_paths:)
         llm_provider = RedmineAiHelper::LlmProvider.get_llm_provider

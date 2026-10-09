@@ -1,8 +1,8 @@
 ---
 title: Tool System
 type: component
-sources: [S008, S016, S026, S032]
-updated: 2026-09-01
+sources: [S008, S016, S026, S032, S033, S034, S036, S041]
+updated: 2026-10-08
 ---
 
 # Tool System
@@ -29,15 +29,29 @@ providers' functions it may call — a per-agent permission boundary (S008).
 
 ## Security & read-only
 
-- **Read checks**: read tools validate access with `issue.visible?` or
-  `accessible_project?` (S008). A tool's project scope can also be made
+- **Read checks**: read tools validate access with Redmine's own visibility
+  (`issue.visible?`, `board.visible?`, …) **and** `accessible_project?` — both,
+  never one instead of the other, since Redmine's `visible?` says nothing about
+  whether the project opted into AI Helper (S008, S034). A tool's project scope can also be made
   *optional*: `IssueSearchTools#search_issues`'s `project_id` is
   `required: false`, and when omitted it scopes to
   `Project.allowed_to_condition(user, :view_ai_helper)` instead of a single
   project's `accessible_project?` check — see
   [search_issues Cross-Project Scoping](./search-issues-cross-project-scoping.md) (S026).
-- **Write checks**: write tools call `User.current.allowed_to?(:action, project)`
-  (S008).
+- **Data-access scope is centralized**: `accessible_project?` and the
+  cross-project SQL condition above both delegate to
+  `RedmineAiHelper::Util::PermissionChecker#data_accessible?` /
+  `#data_access_condition`, which fold in the optional **all-projects
+  data-access scope** admin setting — module-disabled projects can be
+  included via standard Redmine permissions when an admin opts in. See [All-Projects
+  Data-Access Scope](./all-projects-data-access-scope.md) (S033).
+- **Write checks**: write tools call `accessible_project?` first, then
+  `User.current.allowed_to?(:action, project)` — a project outside the
+  data-access scope must not be written to either (S008, S034).
+- **Repository tools**: `RepositoryTools` enforces Redmine's own repository
+  permissions the way Redmine maps them — `:browse_repository` for repository
+  info, file info, file contents and diffs, `:view_changesets` for revision
+  info — on top of `accessible_project?` (S034).
 - **Read-only mode**: because each mutating tool is tagged `write: true`, global
   read-only mode can filter those individual tools out (S008). This is why
   *internal* tools can be selectively disabled, whereas external
@@ -63,13 +77,19 @@ providers' functions it may call — a per-agent permission boundary (S008).
 | `IssueTools`, `IssueSearchTools` | Issue read/search; filter operators like `=`, `>=`, `><t+` |
 | `IssueUpdateTools` | Create/update issues (atomic, `parent_issue_id` hierarchy) |
 | `ProjectTools`, `VersionTools` | Metadata; `accessible_project?` checks |
+| `VersionWriteTools` | Version create/update/delete — see [Version Write Tools](./version-write-tools.md) (S041) |
 | `WikiTools`, `WikiWriteTools` | Wiki read / write — see [Wiki Tools](./wiki-tools.md) |
 | `VectorTools` | Semantic search over Qdrant |
 | `FileTools` | Document analysis via prompt templates |
 | `ImageTools` | Image-attachment handling |
-| `UserTools`, `SystemTools`, `BoardTools`, `RepositoryTools` | Users, env info, forums, SCM |
+| `UserTools`, `SystemTools`, `BoardTools`, `RepositoryTools` | Users, env info + admin [log access](./log-file-access-tools.md) (S036), forums, SCM |
 
 ## Gotchas
+
+- **Error convention**: most tools `raise` on failure, which in chat aborts the
+  whole tool loop. The version tools return `{ error: }` for user mistakes and
+  raise only for system failures — see
+  [Version Write Tools: Strict Input & Error Results](./version-write-tools-error-policy.md) (S041).
 
 - LLM-supplied JSON filter keys may arrive as strings; tools **normalize nested
   hash keys** before use (S008).
@@ -82,3 +102,5 @@ providers' functions it may call — a per-agent permission boundary (S008).
 - [Agent Write-Capability Routing](./agent-write-capability-routing.md)
 - [search_issues Cross-Project Scoping](./search-issues-cross-project-scoping.md)
 - [Wiki Tools](./wiki-tools.md)
+- [Version Write Tools](./version-write-tools.md)
+- [All-Projects Data-Access Scope](./all-projects-data-access-scope.md)

@@ -87,3 +87,17 @@ Briefly describe alternatives that were rejected and why.
 | [032](./032-mcp14-restore-subscriptions-listen-rejection.md) | Restore subscriptions/listen rejection under mcp 1.4.0 | Accepted |
 | [033](./033-list-project-activities-project-batch-load.md) | Batch-load projects for list_project_activities response | Accepted |
 | [034](./034-search-issues-batch-hours.md) | Batch-load hours for search_issues response | Accepted |
+| [035](./035-project-index-legend-body-bottom-hook.md) | Add the AI Helper legend entry via view_layouts_base_body_bottom + JS relocation | Accepted |
+| [036](./036-all-projects-data-access-scope.md) | All-projects data-access scope decouples data access from the ai_helper module | Accepted (scope amended by ADR-037) |
+| [037](./037-data-access-scope-applies-to-every-tool.md) | The data-access scope applies to every tool, and repository tools gain Redmine's own permission checks | Accepted |
+| [038](./038-issue-summary-role-enrichment-gated-on-project-instructions.md) | Issue-summary role enrichment is gated on project instructions and resolved through memberships only | Accepted |
+| [039](./039-log-file-location-resolved-from-runtime-logger.md) | The Redmine log file is resolved from the running Rails.logger | Accepted |
+| [040](./040-tests-must-not-assume-time-advances.md) | Tests must not assume time advances under Redmine's frozen test clock | Accepted |
+| [041](./041-editor-overlays-layered-by-dom-order-without-z-index.md) | Editor overlays are layered by DOM order, without z-index | Accepted |
+| [042](./042-model-profile-temperature-is-optional.md) | Model profile temperature is optional; unset means the request omits it | Accepted |
+| [043](./043-text-attachments-converted-using-redmine-encoding-setting.md) | Text attachments are converted to UTF-8 using Redmine's encoding setting; unconvertible content is replaced by a note | Accepted |
+| [044](./044-health-reports-always-rendered-as-markdown.md) | Health reports are always rendered and edited as Markdown, independent of the text formatting setting | Accepted |
+| [045](./045-health-report-edit-keeps-original-and-latest-only.md) | Health report edits keep only the original and the latest version, with optimistic locking | Accepted |
+| [046](./046-streaming-renders-coalesced-per-animation-frame.md) | Streaming renders are coalesced to at most one per animation frame | Accepted |
+| [047](./047-version-write-tools-reject-disallowed-attributes.md) | Version write tools reject disallowed sharing and non-editable custom fields | Proposed |
+| [048](./048-version-write-tools-return-expected-failures-as-error-results.md) | Version tools return user-caused failures as error results and raise system failures | Proposed |
